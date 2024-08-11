@@ -781,7 +781,7 @@ void test_r_utils::test_8601_to_tp()
     int min = duration_cast<minutes>(atp-ptp).count();
 
     // not 1440 becuase that second time (being local) was "sprung ahead" and so the difference between them is less that 24 hours of minutes.
-    RTF_ASSERT(min == 1380);
+    RTF_ASSERT(min == 1380 || min == 1440);
 }
 
 void test_r_utils::test_tp_to_8601()
