@@ -76,6 +76,7 @@ target_include_directories(
 
 if(CMAKE_SYSTEM MATCHES "Linux-")
     include(find_libunwind.cmake)
+    include(find_libuuid.cmake)
 
     target_link_libraries(
         r_utils PUBLIC
