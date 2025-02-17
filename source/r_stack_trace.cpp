@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef IS_LINUX
 #include <cxxabi.h>
@@ -251,6 +252,7 @@ string r_utils::r_stack_trace::get_stack(char sep)
     return generate_stack();
 #else
     void* trace[256];
+    memset(&trace[0], 0, sizeof(void*) * 256);
     int traceSize = ::backtrace(trace, 256);
     char** buffer = ::backtrace_symbols(trace, traceSize);
 
