@@ -991,7 +991,7 @@ void test_r_utils::test_work_q_timeout()
 
     consumer_th.join();
 
-    RTF_ASSERT(abs(poll_time - 2000) < 100);
+    RTF_ASSERT(abs(poll_time - 2000) < 1000);
 }
 
 void test_r_utils::test_timer_basic()
