@@ -2,12 +2,11 @@
 #include "r_utils/r_stack_trace.h"
 #include "r_utils/r_string_utils.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef IS_LINUX
-#define UNW_LOCAL_ONLY
 #include <cxxabi.h>
-#include <libunwind.h>
 #include <execinfo.h>
 #endif
 #ifdef IS_WINDOWS
@@ -251,36 +250,33 @@ string r_utils::r_stack_trace::get_stack(char sep)
 #ifdef IS_WINDOWS
     return generate_stack();
 #else
-    unw_cursor_t cursor;
-    unw_context_t context;
-
-    // Initialize cursor to current frame for local unwinding.
-    unw_getcontext(&context);
-    unw_init_local(&cursor, &context);
+    void* trace[256];
+    int traceSize = ::backtrace(trace, 256);
+    char** buffer = ::backtrace_symbols(trace, traceSize);
 
     string stack;
-    // Unwind frames one by one, going up the frame stack.
-    while (unw_step(&cursor) > 0) 
+    for( int i = 1; buffer && i < traceSize-1; i++ )
     {
-        unw_word_t offset, pc;
-        unw_get_reg(&cursor, UNW_REG_IP, &pc);
-        if (pc == 0)
-            break;
-        stack += r_string_utils::format("0x%lx:", pc);
+        stack += "[#" + to_string((traceSize-1)-i) + "] ";
+        string s = buffer[i];
+        string mang = s.substr(s.find('(') + 1, s.find('+') - s.find('(') - 1);
 
-        char sym[256];
-        if(unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0)
+        if( char* demangled = abi::__cxa_demangle(mang.c_str(), 0, 0, 0) )
         {
-            char* nameptr = sym;
-            int status;
-            char* demangled = abi::__cxa_demangle(sym, nullptr, nullptr, &status);
-            if(status == 0)
-                nameptr = demangled;
-            stack += r_string_utils::format(" (%s+0x%lx)%c", nameptr, offset, sep);
-            std::free(demangled);
-        } 
-        else stack += r_string_utils::format(" -- error: unable to obtain symbol name for this frame%c", sep);
+            string dm = demangled;
+            free( demangled );
+            // remove "std::" from names...
+            //for( size_t i = dm.find("std::"); i != string::npos; i = dm.find("std::") )
+            //    dm.erase(i, 5);
+
+            stack += dm;
+        } else stack += mang;
+
+        stack += sep;
     }
+
+    if(buffer)
+        free(buffer);
 
     return stack;
 #endif
