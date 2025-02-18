@@ -5,6 +5,7 @@
 #include "r_utils/r_macro.h"
 #include <string>
 #include <vector>
+#include <cstdint>
 #ifdef IS_LINUX
 #include <uuid/uuid.h>
 #endif
