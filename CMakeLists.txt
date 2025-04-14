@@ -92,3 +92,5 @@ elseif(CMAKE_SYSTEM MATCHES "Windows")
 endif(CMAKE_SYSTEM MATCHES "Linux-")
 
 add_subdirectory(ut)
+
+configure_dev_package("r_utils" "General purpose cross platform C++ library")
