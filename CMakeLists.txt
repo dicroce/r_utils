@@ -94,4 +94,6 @@ endif(CMAKE_SYSTEM MATCHES "Linux-")
 
 add_subdirectory(ut)
 
+if(PROJECT_IS_TOP_LEVEL)
 configure_dev_package("r_utils" "General purpose cross platform C++ library")
+endif()
