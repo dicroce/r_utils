@@ -71,7 +71,8 @@ add_library(
 
 target_include_directories(
     r_utils PUBLIC
-    include
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 
 if(CMAKE_SYSTEM MATCHES "Linux-")
