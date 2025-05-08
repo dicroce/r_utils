@@ -285,16 +285,6 @@ void r_socket::connect( const string& host, int port )
     _sok.connect(host, port);
 }
 
-int r_socket::raw_send( const void* buf, size_t len )
-{
-    return _sok.raw_send( buf, len );
-}
-
-int r_socket::raw_recv( void* buf, size_t len )
-{
-    return _sok.raw_recv( buf, len );
-}
-
 void r_socket::send( const void* buf, size_t len )
 {
     int bytesToSend = (int)len;
@@ -360,6 +350,16 @@ void r_socket::recv( void* buf, size_t len )
 
     if( bytesToRecv > 0 )
         R_STHROW(r_socket_exception, ("incomplete io in recv()."));
+}
+
+int r_socket::raw_send(const void* buf, size_t len)
+{
+    return _sok.raw_send(buf, len);
+}
+
+int r_socket::raw_recv(void* buf, size_t len)
+{
+    return _sok.raw_recv(buf, len);
 }
 
 r_socket_connect_exception::r_socket_connect_exception(const char* msg, ...) :

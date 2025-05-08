@@ -133,7 +133,7 @@ void r_ssl_socket::connect(const std::string& host, int port)
     _valid = true;
 }
 
-void r_ssl_socket::close()
+void r_ssl_socket::close() const
 {
     if (_valid) {
         mbedtls_ssl_close_notify(&_ssl);
@@ -145,16 +145,6 @@ void r_ssl_socket::close()
 bool r_ssl_socket::valid() const
 {
     return _valid && _sok.valid();
-}
-
-int r_ssl_socket::raw_send(const void* buf, size_t len)
-{
-    return mbedtls_ssl_write(&_ssl, static_cast<const unsigned char*>(buf), len);
-}
-
-int r_ssl_socket::raw_recv(void* buf, size_t len)
-{
-    return mbedtls_ssl_read(&_ssl, static_cast<unsigned char*>(buf), len);
 }
 
 void r_ssl_socket::send(const void* buf, size_t len)
@@ -177,6 +167,16 @@ void r_ssl_socket::recv(void* buf, size_t len)
             R_THROW(("r_ssl_socket::recv() failed"));
         total += ret;
     }
+}
+
+int r_ssl_socket::raw_send(const void* buf, size_t len)
+{
+    return mbedtls_ssl_write(&_ssl, static_cast<const unsigned char*>(buf), len);
+}
+
+int r_ssl_socket::raw_recv(void* buf, size_t len)
+{
+    return mbedtls_ssl_read(&_ssl, static_cast<unsigned char*>(buf), len);
 }
 
 bool r_ssl_socket::wait_till_recv_wont_block(uint64_t& millis) const

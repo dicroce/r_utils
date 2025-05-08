@@ -39,7 +39,7 @@ add_library(
     source/r_socket_address.cpp
     include/r_utils/interfaces/r_pollable.h
     include/r_utils/interfaces/r_socket_io.h
-    include/r_utils/interfaces/r_stream_io.h
+    include/r_utils/interfaces/r_socket_base.h
     include/r_utils/r_socket.h
     source/r_socket.cpp
     include/r_utils/r_ssl_socket.h

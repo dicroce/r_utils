@@ -2,7 +2,7 @@
 #ifndef r_utils_r_socket_h
 #define r_utils_r_socket_h
 
-#include "r_utils/interfaces/r_stream_io.h"
+#include "r_utils/interfaces/r_socket_base.h"
 #include "r_utils/interfaces/r_socket_io.h"
 #include "r_utils/interfaces/r_pollable.h"
 #include "r_utils/r_socket_address.h"
@@ -50,7 +50,7 @@ class test_r_utils;
 namespace r_utils
 {
 
-class r_raw_socket : public r_socket_io, public r_pollable
+class r_raw_socket : public r_socket_base, public r_pollable
 {
     friend class ::test_r_utils;
 
@@ -73,22 +73,32 @@ public:
 
     R_API void create( int af );
 
-    R_API void connect( const std::string& host, int port );
+    R_API virtual void connect( const std::string& host, int port );
     R_API void listen( int backlog = MAX_BACKLOG );
     R_API void bind( int port, const std::string& ip = "" );
     R_API r_raw_socket accept();
 
     R_API inline SOK get_sok_id() const { return _sok; }
 
-    R_API inline bool valid() const
+    R_API virtual bool valid() const
 	{
 		return (_sok > 0) ? true : false;
 	}
 
-    R_API virtual int raw_send( const void* buf, size_t len );
-    R_API virtual int raw_recv( void* buf, size_t len );
+    R_API virtual void send(const void* buf, size_t len)
+    {
+        R_THROW(("r_raw_socket::send() not implemented"));
+    }
 
-    R_API void close() const;
+    R_API virtual void recv(void* buf, size_t len)
+    {
+        R_THROW(("r_raw_socket::recv() not implemented"));
+    }
+
+    R_API virtual int raw_send(const void* buf, size_t len);
+    R_API virtual int raw_recv(void* buf, size_t len);
+
+    R_API virtual void close() const;
 
     R_API virtual bool wait_till_recv_wont_block( uint64_t& millis ) const;
     R_API virtual bool wait_till_send_wont_block( uint64_t& millis ) const;
@@ -105,7 +115,7 @@ protected:
     static std::recursive_mutex _sokLock;
 };
 
-class r_socket : public r_stream_io, public r_pollable
+class r_socket : public r_socket_base, public r_pollable
 {
     friend class ::test_r_utils;
 
@@ -141,7 +151,7 @@ public:
 
     R_API inline void create( int af ) { _sok.create(af); }
 
-    R_API void connect( const std::string& host, int port );
+    R_API virtual void connect( const std::string& host, int port );
     R_API inline void listen( int backlog = MAX_BACKLOG ) { _sok.listen(backlog); }
     R_API inline void bind( int port, const std::string& ip = "" ) { 
         _sok.bind(port, ip ); 
@@ -150,15 +160,15 @@ public:
 
     R_API inline SOK get_sok_id() const { return _sok.get_sok_id(); }
 
+    R_API inline virtual bool valid() const { return _sok.valid(); }
+
+    R_API virtual void send(const void* buf, size_t len);
+
+    R_API virtual void recv(void* buf, size_t len);
+
     R_API virtual int raw_send( const void* buf, size_t len );
 
     R_API virtual int raw_recv( void* buf, size_t len );
-
-    R_API inline virtual bool valid() const { return _sok.valid(); }
-
-    R_API virtual void send( const void* buf, size_t len );
-
-    R_API virtual void recv( void* buf, size_t len );
 
     R_API inline void close() const { _sok.close(); }
 
@@ -174,7 +184,7 @@ private:
 };
 
 template<class SOK>
-class r_buffered_socket : public r_stream_io, public r_pollable
+class r_buffered_socket : public r_socket_base, public r_pollable
 {
 public:
     friend class ::test_r_utils;
@@ -225,7 +235,7 @@ public:
 
     inline void create( int af ) { _sok.create(af); }
 
-    inline void connect( const std::string& host, int port ) { _sok.connect(host, port); }
+    inline virtual void connect( const std::string& host, int port ) { _sok.connect(host, port); }
     inline void listen( int backlog = MAX_BACKLOG ) { _sok.listen(backlog); }
     inline void bind( int port, const std::string& ip = "" ) { _sok.bind(port, ip ); }
     inline r_buffered_socket accept() { r_buffered_socket bs(_buffer.capacity()); auto s = _sok.accept(); bs._sok = std::move(s); return bs; }
@@ -283,7 +293,16 @@ public:
         }
     }
 
-    inline void close() const { _sok.close(); }
+    virtual int raw_send(const void* buf, size_t len)
+    {
+        R_THROW(("r_buffered_socket::raw_send() not implemented"));
+    }
+    virtual int raw_recv(void* buf, size_t len)
+    {
+        R_THROW(("r_buffered_socket::raw_recv() not implemented"));
+    }
+
+    inline virtual void close() const { _sok.close(); }
 
     inline virtual bool wait_till_recv_wont_block( uint64_t& millis ) const { return _sok.wait_till_recv_wont_block(millis); }
     inline virtual bool wait_till_send_wont_block( uint64_t& millis ) const { return _sok.wait_till_send_wont_block(millis); }
