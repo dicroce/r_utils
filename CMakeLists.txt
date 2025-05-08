@@ -6,8 +6,19 @@ project(r_utils VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJ
 
 include(r_build.txt)
 
+file(GLOB MBEDTLS_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/mbedtls/*.c
+)
+
+file(GLOB MBEDTLS_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/mbedtls/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/psa/*.h
+)
+
 add_library(
     r_utils
+    ${MBEDTLS_HEADERS}
+    ${MBEDTLS_SOURCES}
     include/r_utils/r_actor.h
     include/r_utils/r_macro.h
     include/r_utils/r_args.h
@@ -31,6 +42,8 @@ add_library(
     include/r_utils/interfaces/r_stream_io.h
     include/r_utils/r_socket.h
     source/r_socket.cpp
+    include/r_utils/r_ssl_socket.h
+    source/r_ssl_socket.cpp
     include/r_utils/r_md5.h
     source/r_md5.cpp
     include/r_utils/r_time_utils.h
@@ -72,6 +85,7 @@ add_library(
 target_include_directories(
     r_utils PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source/mbedtls>
     $<INSTALL_INTERFACE:include>
 )
 
@@ -98,4 +112,17 @@ add_subdirectory(ut)
 
 if(PROJECT_IS_TOP_LEVEL OR BUILD_INSTALL_DEV_PACKAGES)
     configure_dev_package("r_utils" "General purpose cross platform C++ library")
+
+    install(
+        DIRECTORY include/mbedtls
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+    )
+
+    install(
+        DIRECTORY include/psa
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+    )
+
 endif()

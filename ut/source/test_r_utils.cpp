@@ -8,6 +8,7 @@
 #include "r_utils/r_md5.h"
 #include "r_utils/r_sha1.h"
 #include "r_utils/r_socket.h"
+#include "r_utils/r_ssl_socket.h"
 #include "r_utils/r_udp_receiver.h"
 #include "r_utils/r_udp_sender.h"
 #include "r_utils/r_byte_ptr.h"
@@ -22,6 +23,7 @@
 #include <thread>
 #include <climits>
 #include <numeric>
+#include <cstdint>
 
 using namespace std;
 using namespace std::chrono;
@@ -541,6 +543,32 @@ void test_r_utils::test_buffered()
     bufSok.close();
     string response = buffer;
     RTF_ASSERT( r_string_utils::contains(response, "google") );
+}
+
+void test_r_utils::test_ssl_socket_connect_to_example_com()
+{
+    r_utils::r_ssl_socket sock(true);
+
+    sock.connect("example.com", 443);
+
+    RTF_ASSERT(sock.valid());
+
+    const std::string request =
+        "GET / HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "Connection: close\r\n"
+        "\r\n";
+
+    sock.send(request.data(), request.size());
+
+    uint8_t buffer[4096] = {0};
+    sock.recv(buffer, 1024);
+
+    std::string response((char*)buffer);
+
+    // Basic validation that we got an HTTP response
+    RTF_ASSERT(response.find("HTTP/1.1") != std::string::npos);
+    RTF_ASSERT(response.find("200 OK") != std::string::npos);
 }
 
 void test_r_utils::test_udp_send()
