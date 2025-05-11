@@ -102,7 +102,9 @@ elseif(CMAKE_SYSTEM MATCHES "Windows")
         DbgHelp 
         ws2_32 
         iphlpapi 
-        rpcrt4.lib
+        rpcrt4
+        Crypt32
+        Bcrypt
     )
 endif(CMAKE_SYSTEM MATCHES "Linux-")
 
